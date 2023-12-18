@@ -1,0 +1,28 @@
+.product {
+  margin: 150px;
+  &__image {
+    background-size: "cover";
+    background-position: "center";
+    width: 120px;
+    height: 100px;
+  }
+
+  &__info {
+  }
+
+  &__container {
+    &__list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+  }
+}
+
+img {
+  width: 120px;
+  height: 100px;
+}

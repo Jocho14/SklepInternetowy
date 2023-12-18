@@ -1,0 +1,58 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fff;
+  border-bottom: 1px solid #e6e6e6;
+  margin: 0;
+  width: 100%;
+
+  &__logo {
+    cursor: pointer;
+    width: 90px;
+    height: 70px;
+    background-image: url("../../../assets/images/logo-medium.png");
+    background-size: cover; // Dodano, aby logo było dobrze wyświetlane
+    background-position: center; // Dodano, aby logo było dobrze wyświetlane
+  }
+
+  &__navbar {
+    display: flex;
+    justify-content: flex-end;
+    &__list {
+      display: flex;
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+  }
+}
+
+.header__navbar__list a {
+  text-decoration: none;
+  font-family: "Tw Cen MT", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  padding: 0 18px;
+  position: relative;
+  cursor: pointer;
+  &::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background-color: #000;
+    bottom: -5px;
+    left: 50%;
+    transition: width 0.3s ease, left 0.3s ease;
+  }
+
+  &:visited {
+    color: inherit;
+  }
+
+  &:hover::after {
+    width: 100%;
+    left: 0;
+  }
+}
