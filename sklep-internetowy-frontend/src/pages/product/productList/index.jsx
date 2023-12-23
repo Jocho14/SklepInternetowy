@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { getProducts } from "../../../services/api/api";
+import { Link } from "react-router-dom";
 import "./styles.scss";
 
 function ProductList() {
   const [products, setProducts] = useState([]);
-  const [images, setImages] = useState([]);
 
   useEffect(() => {
     async function loadProducts() {
@@ -14,14 +14,32 @@ function ProductList() {
     loadProducts();
   }, []);
 
-  const productElements = products.map((product) => (
-    <div key={product.id_produktu} className="product">
-      <img src className="product__image"></img>
+  const seenNames = new Set();
+  const uniqueProducts = products.filter((product) => {
+    if (seenNames.has(product.nazwa)) {
+      return false;
+    } else {
+      seenNames.add(product.nazwa);
+      return true;
+    }
+  });
+
+  const productElements = uniqueProducts.map((product) => (
+    <Link
+      to={`/products/${product.id_produktu}`}
+      key={product.id_produktu}
+      className="product"
+    >
+      <img
+        src={product.obrazek}
+        alt={product.nazwa}
+        className="product__image"
+      />
       <div className="product__info">
         <h3>{product.nazwa}</h3>
         <p>{product.cena_netto_sprzedazy}</p>
       </div>
-    </div>
+    </Link>
   ));
 
   return (

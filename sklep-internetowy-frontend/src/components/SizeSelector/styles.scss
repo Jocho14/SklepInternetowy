@@ -1,0 +1,66 @@
+.size-selector {
+  .size-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    .size-option {
+      padding: 10px 15px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      cursor: pointer;
+      text-align: center;
+      min-width: 50px;
+      border-radius: 4px;
+      &:hover {
+        background-color: #f0f0f0;
+      }
+      &.selected {
+        border-color: #000;
+        font-weight: bold;
+      }
+    }
+  }
+}
+.size-selector-error {
+  border: 1px solid red;
+}
+
+.size__error {
+  color: red;
+}
+
+.add-to-cart-btn {
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+}
+.size-selector {
+  &.error {
+    border: 1px solid red;
+  }
+
+  .size-options {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .size-option {
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+    text-align: center;
+    min-width: 50px;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: #f0f0f0;
+    }
+
+    &.selected {
+      border-color: #000;
+      font-weight: bold;
+    }
+  }
+}

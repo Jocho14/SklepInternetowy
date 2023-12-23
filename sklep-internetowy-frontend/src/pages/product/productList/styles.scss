@@ -12,6 +12,7 @@
 
   &__container {
     &__list {
+      background-color: #e8e3d5;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
@@ -25,4 +26,8 @@
 img {
   width: 120px;
   height: 100px;
+}
+
+h1 {
+  background-color: #e8e3d5;
 }

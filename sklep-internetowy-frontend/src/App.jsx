@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import "./App.css";
 import ProductList from "./pages/product/productList";
+import ProductDetail from "./pages/product/productDetail"; // Zaimportuj komponent ProductDetail
 import Home from "./pages/Home";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Route path="/" element={<Main />}>
           <Route index element={<Home />} />
           <Route path="/products" element={<ProductList />} />
+          <Route path="/products/:productId" element={<ProductDetail />} />{" "}
         </Route>
       </Routes>
     </BrowserRouter>

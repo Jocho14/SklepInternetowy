@@ -1,4 +1,3 @@
-// index.js
 const express = require("express");
 const { Pool } = require("pg");
 const cors = require("cors");
@@ -18,6 +17,20 @@ app.use(cors());
 app.get("/produkty", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM produkty");
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+app.get("/produkty/:nazwa/rozmiary", async (req, res) => {
+  try {
+    const nazwaProduktu = req.params.nazwa;
+    const result = await pool.query(
+      `SELECT r.rozmiar FROM produkty p JOIN rozmiary r ON p.id_rozmiaru = r.id_rozmiaru WHERE p.nazwa = $1`,
+      [nazwaProduktu]
+    );
     res.json(result.rows);
   } catch (err) {
     console.error(err);
