@@ -8,8 +8,10 @@ import {
 } from "react-router-dom";
 import "./App.css";
 import ProductList from "./pages/product/productList";
-import ProductDetail from "./pages/product/productDetail"; // Zaimportuj komponent ProductDetail
+import ProductDetail from "./pages/product/productDetail";
 import Home from "./pages/Home";
+import SignIn from "./components/authentication/SignIn";
+import SignUp from "./components/authentication/SignUp";
 
 function App() {
   return (
@@ -18,7 +20,9 @@ function App() {
         <Route path="/" element={<Main />}>
           <Route index element={<Home />} />
           <Route path="/products" element={<ProductList />} />
-          <Route path="/products/:productId" element={<ProductDetail />} />{" "}
+          <Route path="/products/:productId" element={<ProductDetail />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
         </Route>
       </Routes>
     </BrowserRouter>

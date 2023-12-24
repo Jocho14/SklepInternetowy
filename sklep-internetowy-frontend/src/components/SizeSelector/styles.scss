@@ -1,4 +1,12 @@
 .size-selector {
+  &.error {
+    width: 310px;
+    padding: 0px;
+    border: 2px solid red;
+  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
   .size-options {
     display: flex;
     flex-wrap: wrap;
@@ -18,12 +26,10 @@
       &.selected {
         border-color: #000;
         font-weight: bold;
+        background-color: #d3cfcf;
       }
     }
   }
-}
-.size-selector-error {
-  border: 1px solid red;
 }
 
 .size__error {
@@ -31,36 +37,19 @@
 }
 
 .add-to-cart-btn {
+  cursor: pointer;
+  margin-top: 30px;
+  width: 150px;
+  height: 40px;
+  border-radius: 6px;
+  font-weight: 400;
+  color: white;
+  background-color: black;
   &:disabled {
     background: #ccc;
     cursor: not-allowed;
   }
-}
-.size-selector {
-  &.error {
-    border: 1px solid red;
-  }
-
-  .size-options {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
-  .size-option {
-    border: 1px solid #ccc;
-    background-color: #fff;
-    cursor: pointer;
-    text-align: center;
-    min-width: 50px;
-    border-radius: 4px;
-
-    &:hover {
-      background-color: #f0f0f0;
-    }
-
-    &.selected {
-      border-color: #000;
-      font-weight: bold;
-    }
+  &:hover {
+    background-color: #313131;
   }
 }
