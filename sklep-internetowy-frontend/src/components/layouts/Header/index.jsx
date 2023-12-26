@@ -1,19 +1,29 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
+import { useUser } from "../../../context";
+import { USER_TYPES } from "../../../context/UserTypes";
 import "./styles.scss";
-import { Link, NavLink, Outlet } from "react-router-dom";
 
 function Header() {
+  const { user } = useUser();
+  console.log("header user: ", user);
   return (
     <header className="header">
       <div className="signin-signup-wrapper">
         <div className="signin-signup-container">
-          <NavLink to="/signup" className="signup-link">
-            Zarejestruj Się
-          </NavLink>
-          <span className="separator-link"> | </span>
-          <NavLink to="/signin" className="signin-link">
-            Zaloguj się
-          </NavLink>
+          {user.type === USER_TYPES.CLIENT ? (
+            <span>Cześć, Arturito!</span> // Załóżmy, że `imie` to właściwość w `user.details`
+          ) : (
+            <>
+              <NavLink to="/signup" className="signup-link">
+                Zarejestruj Się
+              </NavLink>
+              <span className="separator-link"> | </span>
+              <NavLink to="/signin" className="signin-link">
+                Zaloguj się
+              </NavLink>
+            </>
+          )}
         </div>
       </div>
       <div className="content">

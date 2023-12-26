@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import videoFile from "../../assets/images/homeBackgroundAnimation.mp4";
 import "./styles.scss";
 
 function Home() {
@@ -27,10 +28,13 @@ function Home() {
   return (
     <div className="home__wrapper">
       <div className="home__container">
+        <h1>
+          Odkryj swój <span style={{ opacity: opacity }}>{currentWord}</span>
+        </h1>
         <div className="home__container__background">
-          <h1>
-            Odkryj swój <span style={{ opacity: opacity }}>{currentWord}</span>
-          </h1>
+          <video className="video" autoPlay loop muted>
+            <source src={videoFile} type="video/mp4" />
+          </video>
         </div>
       </div>
     </div>

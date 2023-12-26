@@ -1,5 +1,5 @@
 .sign-in-wrapper {
-  background-color: rgb(167, 158, 109);
+  background-color: rgb(124, 120, 120);
 
   .sign-in-container {
     display: flex;
@@ -16,6 +16,23 @@
       background-color: transparent;
       font-size: 50px;
       margin-bottom: 80px;
+    }
+
+    .login-error {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      margin-bottom: 10px;
+      background-color: rgb(215, 40, 40);
+      border-radius: 20px;
+      width: 320px;
+      height: 50px;
+
+      &__icon {
+        width: 40px;
+        aspect-ratio: 1/1;
+      }
     }
 
     label {
@@ -59,7 +76,7 @@
         padding: 10px 20px;
         border-radius: 5px;
         border: none;
-        background-color: rgb(167, 158, 109);
+        background-color: rgb(124, 120, 120);
         color: white;
         cursor: pointer;
         font-size: 16px;

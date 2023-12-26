@@ -30,14 +30,16 @@ function ProductList() {
       key={product.id_produktu}
       className="product"
     >
-      <img
-        src={product.obrazek}
-        alt={product.nazwa}
-        className="product__image"
-      />
+      <div className="product-image-wrapper">
+        <img
+          src={product.obrazek}
+          alt={product.nazwa}
+          className="product__image"
+        />
+      </div>
       <div className="product__info">
         <h3>{product.nazwa}</h3>
-        <p>{product.cena_netto_sprzedazy}</p>
+        <p>{product.cena_netto_sprzedazy}zł</p>
       </div>
     </Link>
   ));

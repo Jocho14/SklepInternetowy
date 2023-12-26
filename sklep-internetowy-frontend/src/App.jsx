@@ -12,19 +12,23 @@ import ProductDetail from "./pages/product/productDetail";
 import Home from "./pages/Home";
 import SignIn from "./components/authentication/SignIn";
 import SignUp from "./components/authentication/SignUp";
+import { UserProvider } from "./context";
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Main />}>
-          <Route index element={<Home />} />
-          <Route path="/products" element={<ProductList />} />
-          <Route path="/products/:productId" element={<ProductDetail />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-        </Route>
-      </Routes>
+      <UserProvider>
+        <Routes>
+          <Route path="/" element={<Main />}>
+            <Route index element={<Home />} />
+            <Route path="/products" element={<ProductList />} />
+            <Route path="/products/:productId" element={<ProductDetail />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/cart" element={<Home />} />
+          </Route>
+        </Routes>
+      </UserProvider>
     </BrowserRouter>
   );
 }

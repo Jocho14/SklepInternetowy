@@ -14,20 +14,32 @@
   background-color: rgba(255, 255, 255, 0.8);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .home__container__background {
+  position: relative; /* Pozycjonowanie względne dla kontenera wideo */
   width: 1000px;
-  min-height: 650px;
-  background-image: url("../../assets/images/homeBackground.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  min-height: 620px;
+  overflow: hidden; /* Zapobieganie wyświetlaniu się wideo poza kontenerem */
+  display: flex; /* Aby można było wyśrodkować h1 */
+  justify-content: center; /* Wyśrodkowanie h1 w poziomie */
+  align-items: center; /* Wyśrodkowanie h1 w pionie */
+}
+
+.video {
+  position: absolute; /* Absolutne pozycjonowanie wideo */
+  top: 0;
+  left: 0;
+  width: 100%; /* Szerokość wideo równa szerokości kontenera */
+  height: 100%; /* Wysokość wideo równa wysokości kontenera */
+  object-fit: cover; /* Wypełnienie kontenera wideo bez utraty proporcji */
 }
 
 h1 {
+  position: relative; /* Wyzsze pozycjonowanie niż wideo */
+  z-index: 10; /* Upewnienie się, że tekst jest nad wideo */
+  color: #fff; /* Możesz dostosować kolor tekstu */
   text-align: center;
   font-family: "Yellowtail", sans-serif;
   font-weight: 100;
