@@ -2,7 +2,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  height: 100vh; /* Pełna wysokość widoku */
+  height: 100vh;
   max-width: 100vw;
   background-color: #e8e3d5;
 }
@@ -18,28 +18,28 @@
 }
 
 .home__container__background {
-  position: relative; /* Pozycjonowanie względne dla kontenera wideo */
+  position: relative;
   width: 1000px;
   min-height: 620px;
-  overflow: hidden; /* Zapobieganie wyświetlaniu się wideo poza kontenerem */
-  display: flex; /* Aby można było wyśrodkować h1 */
-  justify-content: center; /* Wyśrodkowanie h1 w poziomie */
-  align-items: center; /* Wyśrodkowanie h1 w pionie */
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .video {
-  position: absolute; /* Absolutne pozycjonowanie wideo */
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100%; /* Szerokość wideo równa szerokości kontenera */
-  height: 100%; /* Wysokość wideo równa wysokości kontenera */
-  object-fit: cover; /* Wypełnienie kontenera wideo bez utraty proporcji */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 h1 {
-  position: relative; /* Wyzsze pozycjonowanie niż wideo */
-  z-index: 10; /* Upewnienie się, że tekst jest nad wideo */
-  color: #fff; /* Możesz dostosować kolor tekstu */
+  position: relative;
+  z-index: 10;
+  color: #fff;
   text-align: center;
   font-family: "Yellowtail", sans-serif;
   font-weight: 100;

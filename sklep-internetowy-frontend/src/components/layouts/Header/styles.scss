@@ -23,8 +23,15 @@
   justify-content: space-between;
 }
 
+.cart-icon {
+  width: 25px;
+  aspect-ratio: 1/1;
+}
+
 .signup-link,
-.signin-link {
+.signin-link,
+.logout-link,
+.welcome-title {
   text-decoration: none;
   color: #000;
   font-size: 14px;

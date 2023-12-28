@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { useUser } from "../../../context";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { USER_TYPES } from "../../../context/UserTypes";
+import { useAuth } from "../../../context/auth";
 import errorAlertIcon from "../../../assets/images/authentication/errorAlertIcon.png";
 import "./styles.scss";
 
@@ -8,8 +9,10 @@ function SignIn() {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
 
-  const { loginUser } = useUser();
+  const navigateTo = useNavigate();
+  const { loginContext } = useAuth();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -17,13 +20,14 @@ function SignIn() {
     try {
       const response = await fetch("http://localhost:3001/login", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ login, password }),
       });
 
-      console.log(JSON.stringify({ login, password }));
+      console.log(login, password);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -31,14 +35,10 @@ function SignIn() {
 
       const data = await response.json();
       if (data.success) {
-        console.log("Zalogowano pomyślnie:", data);
-        loginUser(
-          data.idUzytkownika,
-          data.typUzytkownika === "CLIENT"
-            ? USER_TYPES.CLIENT
-            : USER_TYPES.EMPLOYEE
-        );
-        console.log("Zalogowano jako:", data.typUzytkownika);
+        console.log("Zalogowano pomyślnie");
+        loginContext();
+        setLoggedIn(true);
+        navigateTo("/");
       } else {
         console.error("Błąd logowania:", data.message);
         setLoginError(true);
@@ -84,6 +84,7 @@ function SignIn() {
           </div>
           <button type="submit">Zaloguj</button>
         </form>
+        {loggedIn && <h1>Jesteś zalogowany</h1>}
       </div>
     </div>
   );

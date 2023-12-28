@@ -12,12 +12,13 @@ import ProductDetail from "./pages/product/productDetail";
 import Home from "./pages/Home";
 import SignIn from "./components/authentication/SignIn";
 import SignUp from "./components/authentication/SignUp";
-import { UserProvider } from "./context";
+import Cart from "./pages/cart";
+import { AuthProvider } from "./context/auth";
 
 function App() {
   return (
     <BrowserRouter>
-      <UserProvider>
+      <AuthProvider>
         <Routes>
           <Route path="/" element={<Main />}>
             <Route index element={<Home />} />
@@ -25,10 +26,10 @@ function App() {
             <Route path="/products/:productId" element={<ProductDetail />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/cart" element={<Home />} />
+            <Route path="/cart" element={<Cart />} />
           </Route>
         </Routes>
-      </UserProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

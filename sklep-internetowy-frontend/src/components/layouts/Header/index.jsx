@@ -1,18 +1,52 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { useUser } from "../../../context";
-import { USER_TYPES } from "../../../context/UserTypes";
+import { useAuth } from "../../../context/auth";
+import SignOut from "../../authentication/SignOut";
+import cartIcon from "../../../assets/images/header/bagIcon.png";
 import "./styles.scss";
 
 function Header() {
-  const { user } = useUser();
-  console.log("header user: ", user);
+  const { isLoggedIn, loginContext, logoutContext } = useAuth();
+  const [userName, setUserName] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function checkSession() {
+      try {
+        setLoading(true);
+        const response = await fetch("http://localhost:3001/check-session", {
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.isLoggedIn) {
+          loginContext();
+          setUserName(data.user.name);
+        }
+        console.log(data);
+      } catch (error) {
+        console.error("Nie udało się zweryfikować użytkownika:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    checkSession();
+  }, []);
+
   return (
     <header className="header">
       <div className="signin-signup-wrapper">
         <div className="signin-signup-container">
-          {user.type === USER_TYPES.CLIENT ? (
-            <span>Cześć, Arturito!</span> // Załóżmy, że `imie` to właściwość w `user.details`
+          {isLoggedIn ? (
+            <>
+              <span className="welcome-title">Cześć, {userName}</span>
+              <span className="separator-link"> | </span>
+              <NavLink to="/signin" className="logout-link">
+                <SignOut />
+              </NavLink>
+            </>
           ) : (
             <>
               <NavLink to="/signup" className="signup-link">
@@ -35,6 +69,11 @@ function Header() {
             <NavLink to="/products">Produkty</NavLink>
             <NavLink to="/about">O nas</NavLink>
             <NavLink to="/contact">Kontakt</NavLink>
+            {isLoggedIn && (
+              <NavLink to="/cart" className="cart-link">
+                <img className="cart-icon" src={cartIcon} />
+              </NavLink>
+            )}
           </nav>
         </div>
       </div>

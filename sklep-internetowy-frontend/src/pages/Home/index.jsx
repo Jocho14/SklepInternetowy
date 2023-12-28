@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import videoFile from "../../assets/images/homeBackgroundAnimation.mp4";
+import videoFile from "../../assets/images/home/homeBackgroundAnimation.mp4";
 import "./styles.scss";
 
 function Home() {

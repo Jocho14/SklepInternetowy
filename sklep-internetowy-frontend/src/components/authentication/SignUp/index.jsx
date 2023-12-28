@@ -24,7 +24,7 @@ function SignUp() {
     <div className="sign-up-wrapper">
       <div className="sign-up-container">
         <h1>Zarejestruj się w LondonLook</h1>
-        <form className="sign-up-form" onSubmit={handleSubmit}>
+        <form className="sign-up-form">
           <div className="input-wrapper">
             <label htmlFor="name">Imię</label>
             <input

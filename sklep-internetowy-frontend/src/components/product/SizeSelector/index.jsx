@@ -1,5 +1,5 @@
 import React from "react";
-import "./styles.scss"; // Załóżmy, że style są zdefiniowane w tym pliku
+import "./styles.scss";
 
 function SizeSelector({ sizes, onSelectSize, selectedSize, isSizeError }) {
   const handleSizeClick = (size) => {
