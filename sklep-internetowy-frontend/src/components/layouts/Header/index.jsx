@@ -67,7 +67,7 @@ function Header() {
         <div className="header__navbar">
           <nav className="header__navbar__list">
             <NavLink to="/products">Produkty</NavLink>
-            <NavLink to="/about">O nas</NavLink>
+            <NavLink to="/aboutus">O nas</NavLink>
             <NavLink to="/contact">Kontakt</NavLink>
             {isLoggedIn && (
               <NavLink to="/cart" className="cart-link">

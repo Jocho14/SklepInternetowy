@@ -13,6 +13,8 @@ import Home from "./pages/Home";
 import SignIn from "./components/authentication/SignIn";
 import SignUp from "./components/authentication/SignUp";
 import Cart from "./pages/cart";
+import AboutUs from "./pages/AboutUs";
+import Contact from "./pages/Contact";
 import { AuthProvider } from "./context/auth";
 
 function App() {
@@ -27,6 +29,8 @@ function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/aboutus" element={<AboutUs />} />
+            <Route path="/contact" element={<Contact />} />
           </Route>
         </Routes>
       </AuthProvider>
