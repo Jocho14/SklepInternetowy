@@ -18,7 +18,7 @@ function AboutUs() {
       <p>
         W naszym projekcie wykorzystujemy relacyjną bazę danych{" "}
         <b>PostgreSQL</b>, która zapewnia niezawodność i wydajność dla naszych
-        aplikacji. Sama aplikacja webowa została stworzona przy użyciu:
+        aplikacji. Sama aplikacja webowa została stworzona przy użyciu
         frameworków języka JavaScript: <b>React.js</b>, <b>Express.js</b> oraz{" "}
         <b>Node.js</b> . Jesteśmy zaangażowani w tworzenie oprogramowania, które
         jest nie tylko funkcjonalne, ale też intuicyjne i przyjemne w użyciu.

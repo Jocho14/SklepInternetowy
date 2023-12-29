@@ -31,26 +31,25 @@ function Cart() {
     fetchOrCreateOrder();
   }, []);
 
-  useEffect(() => {
-    async function fetchCartItems() {
-      try {
-        setLoading(true);
-        const response = await fetch("http://localhost:3001/cart-items", {
-          credentials: "include",
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log(data);
-        setCartItems(data);
-      } catch (error) {
-        console.error("Nie udało się pobrać danych koszyka:", error);
-      } finally {
-        setLoading(false);
+  const fetchCartItems = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:3001/cart-items", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      const data = await response.json();
+      setCartItems(data);
+    } catch (error) {
+      console.error("Nie udało się pobrać danych koszyka:", error);
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     fetchCartItems();
   }, []);
 
@@ -71,6 +70,31 @@ function Cart() {
     }
   };
 
+  const removeProductFromOrder = async (productId, size) => {
+    try {
+      const response = await fetch(
+        "http://localhost:3001/remove-product-from-order",
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ productId, size }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Usunięto produkt, odśwież listę produktów w koszyku
+      fetchCartItems();
+    } catch (error) {
+      console.error("Error removing product from order:", error);
+    }
+  };
+
   const total = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
@@ -87,7 +111,7 @@ function Cart() {
         {cartItems.map((item) => (
           <div className="cart-item" key={item.id}>
             <div className="item-info">
-              <img src={item.obrazek} alt={item.name} className="item-image" />
+              <img src={item.image} alt={item.name} className="item-image" />
               <div className="item-details">
                 <p className="item-name">{item.name}</p>
                 <p className="item-price">{item.price} zł</p>
@@ -98,6 +122,12 @@ function Cart() {
             <p className="item-subtotal">
               {(item.price * item.quantity).toFixed(2)} zł
             </p>
+            <button
+              onClick={() => removeProductFromOrder(item.id, item.size)}
+              className="remove-item-btn"
+            >
+              Usuń
+            </button>
           </div>
         ))}
       </div>

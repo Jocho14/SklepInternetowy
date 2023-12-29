@@ -260,6 +260,42 @@ app.post("/add-product-to-order", async (req, res) => {
   }
 });
 
+app.delete("/remove-product-from-order", async (req, res) => {
+  console.log("trying to remove product from order");
+  console.log("remove user: ", req.session.user);
+  console.log("remove order: ", req.session.orderId);
+  if (!req.session.user || !req.session.orderId) {
+    return res
+      .status(403)
+      .send("Użytkownik nie jest zalogowany lub nie ma aktywnego zamówienia.");
+  }
+
+  const { productId, size } = req.body;
+  console.log("remove size: ", size);
+  console.log("remove productId: ", productId);
+
+  try {
+    const sizeResult = await pool.query(
+      "SELECT id_rozmiaru FROM rozmiary WHERE rozmiar = $1",
+      [size]
+    );
+    if (sizeResult.rows.length === 0) {
+      return res.status(404).send("Podany rozmiar nie istnieje.");
+    }
+    const id_rozmiaru = sizeResult.rows[0].id_rozmiaru;
+
+    await pool.query(
+      "DELETE FROM zamowienia_produkty WHERE id_zamowienia = $1 AND id_produktu = $2 AND id_rozmiaru = $3",
+      [req.session.orderId, productId, id_rozmiaru]
+    );
+
+    res.send("Produkt usunięty z zamówienia.");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
 app.get("/cart-items", async (req, res) => {
   if (!req.session.user || !req.session.user.id) {
     return res.status(401).json({ message: "Użytkownik nie jest zalogowany." });
@@ -280,16 +316,20 @@ app.get("/cart-items", async (req, res) => {
     const currentOrderId = currentOrderResult.rows[0].id_zamowienia;
 
     const cartItemsResult = await pool.query(
-      "SELECT p.nazwa, p.cena_netto_sprzedazy, p.obrazek, zp.ilosc FROM produkty p INNER JOIN zamowienia_produkty zp ON p.id_produktu = zp.id_produktu WHERE zp.id_zamowienia = $1",
+      "SELECT p.id_produktu, p.nazwa, p.cena_netto_sprzedazy, p.obrazek, r.rozmiar, zp.ilosc FROM produkty p INNER JOIN zamowienia_produkty zp ON p.id_produktu = zp.id_produktu INNER JOIN rozmiary r ON p.id_rozmiaru = r.id_rozmiaru WHERE zp.id_zamowienia = $1",
       [currentOrderId]
     );
 
     const cartItems = cartItemsResult.rows.map((row) => ({
+      id: row.id_produktu,
       name: row.nazwa,
-      size: row.id_rozmiaru,
+      size: row.rozmiar,
       price: row.cena_netto_sprzedazy,
       quantity: row.ilosc,
+      image: row.obrazek,
     }));
+
+    console.log("cart itemy: ", cartItems);
 
     res.json(cartItems);
   } catch (error) {
