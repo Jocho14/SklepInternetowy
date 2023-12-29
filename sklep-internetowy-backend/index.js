@@ -340,6 +340,66 @@ app.get("/cart-items", async (req, res) => {
   }
 });
 
+app.get("/completed-orders", async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).send("Użytkownik nie jest zalogowany.");
+  }
+
+  try {
+    const completedOrdersResult = await pool.query(
+      `SELECT 
+        o.id_zamowienia, 
+        o.data_zlozenia_zamowienia, 
+        p.id_produktu, 
+        p.nazwa, 
+        r.rozmiar, 
+        zp.ilosc, 
+        p.cena_netto_sprzedazy, 
+        p.obrazek 
+       FROM 
+        zamowienia o 
+       JOIN zamowienia_produkty zp ON o.id_zamowienia = zp.id_zamowienia 
+       JOIN produkty p ON zp.id_produktu = p.id_produktu 
+       JOIN rozmiary r ON p.id_rozmiaru = r.id_rozmiaru 
+       WHERE 
+        o.id_klienta = $1 
+        AND o.data_zlozenia_zamowienia IS NOT NULL`,
+      [req.session.user.id]
+    );
+
+    // Struktura danych do przesłania jako odpowiedź JSON
+    let orders = completedOrdersResult.rows.reduce((acc, item) => {
+      let order = acc.find(
+        (order) => order.id_zamowienia === item.id_zamowienia
+      );
+      if (!order) {
+        order = {
+          id_zamowienia: item.id_zamowienia,
+          data_zlozenia_zamowienia: item.data_zlozenia_zamowienia,
+          produkty: [],
+        };
+        acc.push(order);
+      }
+      order.produkty.push({
+        id_produktu: item.id_produktu,
+        nazwa: item.nazwa,
+        rozmiar: item.rozmiar,
+        ilosc: item.ilosc,
+        cena: item.cena_netto_sprzedazy,
+        obrazek: item.obrazek,
+      });
+      return acc;
+    }, []);
+
+    console.log("ordery: ", orders);
+
+    res.json(orders);
+  } catch (error) {
+    console.error("Error fetching completed orders:", error);
+    res.status(500).send("Server error");
+  }
+});
+
 app.post("/finalize-order", async (req, res) => {
   console.log("finalize, user: ", req.session.user);
   console.log("finalize, order: ", req.session.orderId);
