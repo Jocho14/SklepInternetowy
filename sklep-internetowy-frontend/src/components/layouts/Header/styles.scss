@@ -18,7 +18,8 @@
 }
 
 .signin-signup-container {
-  width: 200px;
+  width: 250px;
+  height: 27px;
   display: flex;
   justify-content: space-between;
 }
@@ -109,4 +110,8 @@
     left: 50%;
     transition: width 0.3s ease, left 0.3s ease;
   }
+}
+
+.user-profile-icon {
+  width: 30px;
 }

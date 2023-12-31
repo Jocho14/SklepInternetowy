@@ -114,6 +114,81 @@ app.post("/logout", (req, res) => {
   });
 });
 
+// Endpoint do pobierania danych profilu użytkownika
+app.get("/profile", async (req, res) => {
+  // Sprawdzenie, czy użytkownik jest zalogowany
+  if (!req.session.user) {
+    return res.status(401).send("Użytkownik nie jest zalogowany.");
+  }
+
+  const userId = req.session.user.id; // Pobranie ID użytkownika z sesji
+
+  try {
+    // Pobieranie danych użytkownika
+    const userData = await pool.query(
+      `
+      SELECT u.imie, u.nazwisko, u.login, a.miejscowosc, a.ulica, a.nr_domu, a.nr_lokalu, a.kod_pocztowy, e.email, t.numer_telefonu
+      FROM uzytkownicy u
+      LEFT JOIN uzytkownicy_adresy ua ON u.id_uzytkownika = ua.id_uzytkownika
+      LEFT JOIN adresy a ON ua.id_adresu = a.id_adresu
+      LEFT JOIN uzytkownicy_adresy_email ue ON u.id_uzytkownika = ue.id_uzytkownika
+      LEFT JOIN adresy_email e ON ue.id_email = e.id_email
+      LEFT JOIN uzytkownicy_numery_telefonu ut ON u.id_uzytkownika = ut.id_uzytkownika
+      LEFT JOIN numery_telefonu t ON ut.id_telefonu = t.id_telefonu
+      WHERE u.id_uzytkownika = $1
+    `,
+      [userId]
+    );
+
+    if (userData.rowCount === 0) {
+      return res.status(404).send("Użytkownik nie został znaleziony.");
+    }
+
+    const userAddresses = await pool.query(
+      `
+      SELECT a.miejscowosc, a.ulica, a.nr_domu, a.nr_lokalu, a.kod_pocztowy
+      FROM uzytkownicy_adresy ua
+      JOIN adresy a ON ua.id_adresu = a.id_adresu
+      WHERE ua.id_uzytkownika = $1
+    `,
+      [userId]
+    );
+
+    const userEmails = await pool.query(
+      `
+      SELECT e.email
+      FROM uzytkownicy_adresy_email ue
+      JOIN adresy_email e ON ue.id_email = e.id_email
+      WHERE ue.id_uzytkownika = $1
+    `,
+      [userId]
+    );
+
+    const userPhones = await pool.query(
+      `
+      SELECT t.numer_telefonu
+      FROM uzytkownicy_numery_telefonu ut
+      JOIN numery_telefonu t ON ut.id_telefonu = t.id_telefonu
+      WHERE ut.id_uzytkownika = $1
+    `,
+      [userId]
+    );
+
+    // Złożenie wszystkich informacji o użytkowniku w jeden obiekt
+    const userInfo = {
+      ...userData.rows[0],
+      adresy: userAddresses.rows,
+      emaile: userEmails.rows,
+      telefony: userPhones.rows,
+    };
+
+    res.json(userInfo);
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).send("Server error");
+  }
+});
+
 async function sprawdzTypUzytkownika(idUzytkownika) {
   try {
     const clientResult = await pool.query(

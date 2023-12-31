@@ -15,6 +15,7 @@ import SignUp from "./components/authentication/SignUp";
 import Cart from "./pages/cart";
 import AboutUs from "./pages/AboutUs";
 import Contact from "./pages/Contact";
+import UserProfile from "./pages/UserProfile";
 import { AuthProvider } from "./context/auth";
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="userProfile" element={<UserProfile />} />
           </Route>
         </Routes>
       </AuthProvider>

@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../../../context/auth";
 import SignOut from "../../authentication/SignOut";
 import cartIcon from "../../../assets/images/header/bagIcon.png";
+import userProfileIcon from "../../../assets/images/header/userProfileIcon.png";
 import "./styles.scss";
 
 function Header() {
@@ -42,6 +43,10 @@ function Header() {
           {isLoggedIn ? (
             <>
               <span className="welcome-title">Cześć, {userName}</span>
+              <span className="separator-link"> | </span>
+              <NavLink to="/userProfile" className="user-profile-link">
+                <img className="user-profile-icon" src={userProfileIcon} />
+              </NavLink>
               <span className="separator-link"> | </span>
               <NavLink to="/signin" className="logout-link">
                 <SignOut />
