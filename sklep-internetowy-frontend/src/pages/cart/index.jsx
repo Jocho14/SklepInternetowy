@@ -3,14 +3,19 @@ import "./styles.scss";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
+
+  const [pendingOrders, setPendingOrders] = useState([]);
   const [completedOrders, setCompletedOrders] = useState([]);
+
+  const [returnedProducts, setReturnedProducts] = useState({});
+
   const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [expandedOrders, setExpandedOrders] = useState({});
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchOrCreateOrder() {
-      console.log("fetching order");
       try {
         const response = await fetch(
           "http://localhost:3001/get-or-create-order",
@@ -25,7 +30,6 @@ function Cart() {
         }
 
         const orderData = await response.json();
-        console.log("fetched orded: ", orderData);
       } catch (error) {
         console.error("Error creating or fetching order:", error);
       }
@@ -54,6 +58,26 @@ function Cart() {
 
   useEffect(() => {
     fetchCartItems();
+  }, []);
+
+  useEffect(() => {
+    async function fetchPendingOrders() {
+      try {
+        const response = await fetch("http://localhost:3001/pending-orders", {
+          credentials: "include",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setPendingOrders(data);
+        } else {
+          throw new Error("Failed to fetch pending orders.");
+        }
+      } catch (error) {
+        console.error("Error fetching pending orders:", error);
+      }
+    }
+
+    fetchPendingOrders();
   }, []);
 
   useEffect(() => {
@@ -133,6 +157,52 @@ function Cart() {
     }
   };
 
+  const handleReturnProduct = async (orderId, productId, quantity, price) => {
+    try {
+      const response = await fetch("http://localhost:3001/return-product", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ orderId, productId, quantity, price }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+    } catch (error) {
+      console.error("Error returning product:", error);
+    }
+  };
+
+  const checkIfProductReturned = async (orderId, productId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/is-product-returned/${orderId}/${productId}`,
+        {
+          credentials: "include",
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setReturnedProducts((prevState) => ({
+        ...prevState,
+        [`${orderId}_${productId}`]: data.isReturned,
+      }));
+    } catch (error) {
+      console.error("Error checking if product is returned:", error);
+    }
+  };
+
+  const isProductReturned = (orderId, productId) => {
+    return returnedProducts[`${orderId}_${productId}`];
+  };
+
   const total = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
@@ -190,7 +260,7 @@ function Cart() {
         </h2>
         {isSectionExpanded("pendingOrders") && (
           <div className="pending-orders">
-            {completedOrders
+            {pendingOrders
               .filter((order) => order.data_zlozenia_zamowienia)
               .map((order) => (
                 <div key={order.id_zamowienia} className="pending-order">
@@ -216,6 +286,72 @@ function Cart() {
                           </p>
                         </div>
                       ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+          </div>
+        )}
+        <h2 onClick={() => toggleOrdersSection("completedOrders")}>
+          Zamówienia zrealizowane
+        </h2>
+
+        {isSectionExpanded("completedOrders") && (
+          <div className="completed-orders">
+            {completedOrders
+              .filter((order) => order.data_zlozenia_zamowienia)
+              .map((order) => (
+                <div key={order.id_zamowienia} className="completed-order">
+                  <button
+                    onClick={() => toggleOrderDetails(order.id_zamowienia)}
+                  >
+                    Zamówienie z dnia:{" "}
+                    {new Date(
+                      order.data_zlozenia_zamowienia
+                    ).toLocaleDateString()}
+                  </button>
+                  {expandedOrderId === order.id_zamowienia && (
+                    <div className="order-details">
+                      {order.produkty.map((product) => {
+                        if (expandedOrderId === order.id_zamowienia) {
+                          checkIfProductReturned(
+                            order.id_zamowienia,
+                            product.id_produktu
+                          );
+                        }
+                        return (
+                          <div key={product.id} className="product-details">
+                            <p className="item-name">{product.nazwa}</p>
+                            <p className="item-price">{product.cena} zł</p>
+                            <p className="item-size">
+                              Rozmiar: {product.rozmiar}
+                            </p>
+                            <p className="item-quantity">
+                              Ilość: {product.ilosc}
+                            </p>
+                            {!isProductReturned(
+                              order.id_zamowienia,
+                              product.id_produktu
+                            ) ? (
+                              <button
+                                onClick={() =>
+                                  handleReturnProduct(
+                                    order.id_zamowienia,
+                                    product.id_produktu,
+                                    product.ilosc,
+                                    product.cena
+                                  )
+                                }
+                                className="return-item-btn"
+                              >
+                                Zwróć
+                              </button>
+                            ) : (
+                              <p>Zwrócono</p>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

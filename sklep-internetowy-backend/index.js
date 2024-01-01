@@ -415,7 +415,7 @@ app.get("/cart-items", async (req, res) => {
   }
 });
 
-app.get("/completed-orders", async (req, res) => {
+app.get("/pending-orders", async (req, res) => {
   if (!req.session.user) {
     return res.status(401).send("Użytkownik nie jest zalogowany.");
   }
@@ -438,7 +438,8 @@ app.get("/completed-orders", async (req, res) => {
        JOIN rozmiary r ON p.id_rozmiaru = r.id_rozmiaru 
        WHERE 
         o.id_klienta = $1 
-        AND o.data_zlozenia_zamowienia IS NOT NULL`,
+        AND o.data_zlozenia_zamowienia IS NOT NULL
+        AND o.data_przyjecia_zamowienia IS NULL`,
       [req.session.user.id]
     );
 
@@ -471,6 +472,117 @@ app.get("/completed-orders", async (req, res) => {
     res.json(orders);
   } catch (error) {
     console.error("Error fetching completed orders:", error);
+    res.status(500).send("Server error");
+  }
+});
+
+app.get("/completed-orders", async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).send("Użytkownik nie jest zalogowany.");
+  }
+
+  try {
+    const completedOrdersResult = await pool.query(
+      `SELECT 
+        o.id_zamowienia, 
+        o.data_zlozenia_zamowienia,
+        o.data_przyjecia_zamowienia, 
+        p.id_produktu, 
+        p.nazwa, 
+        r.rozmiar, 
+        zp.ilosc, 
+        p.cena_netto_sprzedazy, 
+        p.obrazek 
+       FROM 
+        zamowienia o 
+       JOIN zamowienia_produkty zp ON o.id_zamowienia = zp.id_zamowienia 
+       JOIN produkty p ON zp.id_produktu = p.id_produktu 
+       JOIN rozmiary r ON p.id_rozmiaru = r.id_rozmiaru 
+       WHERE 
+        o.id_klienta = $1 
+        AND o.data_zlozenia_zamowienia IS NOT NULL AND o.data_przyjecia_zamowienia IS NOT NULL`,
+      [req.session.user.id]
+    );
+
+    // Struktura danych do przesłania jako odpowiedź JSON
+    let orders = completedOrdersResult.rows.reduce((acc, item) => {
+      let order = acc.find(
+        (order) => order.id_zamowienia === item.id_zamowienia
+      );
+      if (!order) {
+        order = {
+          id_zamowienia: item.id_zamowienia,
+          data_zlozenia_zamowienia: item.data_zlozenia_zamowienia,
+          produkty: [],
+        };
+        acc.push(order);
+      }
+      order.produkty.push({
+        id_produktu: item.id_produktu,
+        nazwa: item.nazwa,
+        rozmiar: item.rozmiar,
+        ilosc: item.ilosc,
+        cena: item.cena_netto_sprzedazy,
+        obrazek: item.obrazek,
+      });
+      return acc;
+    }, []);
+
+    console.log("ordery: ", orders);
+
+    res.json(orders);
+  } catch (error) {
+    console.error("Error fetching completed orders:", error);
+    res.status(500).send("Server error");
+  }
+});
+
+app.post("/return-product", async (req, res) => {
+  const { orderId, productId, quantity, price } = req.body;
+  console.log(productId);
+  if (!req.session.user) {
+    return res.status(403).send("Użytkownik nie jest zalogowany.");
+  }
+
+  try {
+    // Tworzenie nowego zwrotu
+    const newReturn = await pool.query(
+      "INSERT INTO zwroty (id_powiazanego_zamowienia, data_zlozenia) VALUES ($1, NOW()) RETURNING id_zwrotu",
+      [orderId]
+    );
+    const returnId = newReturn.rows[0].id_zwrotu;
+
+    // Dodanie produktu do zwrotu
+    await pool.query(
+      "INSERT INTO zwroty_produkty (id_zwrotu, id_produktu, ilosc, cena) VALUES ($1, $2, $3, $4)",
+      [returnId, productId, quantity, price]
+    );
+
+    res.json({ message: "Zwrot zarejestrowany pomyślnie." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Błąd serwera przy rejestracji zwrotu.");
+  }
+});
+
+app.get("/is-product-returned/:orderId/:productId", async (req, res) => {
+  const { orderId, productId } = req.params;
+  console.log("is-product-returned: ", orderId, productId);
+  try {
+    const result = await pool.query(
+      `SELECT EXISTS (
+        SELECT 1 
+        FROM zwroty_produkty zp 
+        JOIN zwroty z ON z.id_zwrotu = zp.id_zwrotu
+        WHERE z.id_powiazanego_zamowienia = $1 AND zp.id_produktu = $2
+      ) AS is_returned`,
+      [orderId, productId]
+    );
+
+    const isReturned = result.rows[0].is_returned;
+    res.json({ isReturned });
+  } catch (error) {
+    console.error("Error checking if product is returned:", error);
     res.status(500).send("Server error");
   }
 });
