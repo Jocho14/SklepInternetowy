@@ -65,3 +65,43 @@ a {
 h1 {
   background-color: #e8e3d5;
 }
+.category-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  background-color: #e8e3d5;
+
+  &.selected {
+    background-color: #adafad; // zmień na preferowany kolor
+    color: #333;
+    border-color: #aaa;
+
+    &:hover {
+      background-color: #adafad; // opcjonalnie inny kolor przy najechaniu
+    }
+  }
+
+  button {
+    background-color: #ffffff;
+    color: #333333;
+    border: 2px solid #cccccc;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: #adafad;
+      color: #555555;
+      border-color: #bbbbbb;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}

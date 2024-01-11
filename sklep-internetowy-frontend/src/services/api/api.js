@@ -4,6 +4,20 @@ export async function getProducts() {
   return data;
 }
 
+export async function getCategories() {
+  const res = await fetch("http://localhost:3001/kategorie");
+  const data = await res.json();
+  return data;
+}
+
+export async function getProductsByCategory(categoryId) {
+  const res = await fetch(
+    `http://localhost:3001/produkty?category=${categoryId}`
+  );
+  const data = await res.json();
+  return data;
+}
+
 export async function getSizes(productName) {
   try {
     const response = await fetch(

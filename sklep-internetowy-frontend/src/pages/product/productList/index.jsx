@@ -1,18 +1,37 @@
 import React, { useState, useEffect } from "react";
-import { getProducts } from "../../../services/api/api";
+import {
+  getProducts,
+  getCategories,
+  getProductsByCategory,
+} from "../../../services/api/api";
 import { Link } from "react-router-dom";
 import "./styles.scss";
 
 function ProductList() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
   useEffect(() => {
     async function loadProducts() {
-      const data = await getProducts();
-      setProducts(data);
+      const productsData = await getProducts();
+      setProducts(productsData);
+      const categoriesData = await getCategories();
+      setCategories(categoriesData);
     }
     loadProducts();
   }, []);
+
+  const handleCategoryClick = async (id_kategorii) => {
+    setSelectedCategoryId(id_kategorii);
+    let data;
+    if (id_kategorii === null) {
+      data = await getProducts();
+    } else {
+      data = await getProductsByCategory(id_kategorii);
+    }
+    setProducts(data);
+  };
 
   const seenNames = new Set();
   const uniqueProducts = products.filter((product) => {
@@ -47,6 +66,30 @@ function ProductList() {
   return (
     <div className="product__container">
       <h1>Zobacz nasze produkty</h1>
+      <div>
+        <div className="category-buttons">
+          <button
+            onClick={() => handleCategoryClick(null)}
+            className={`category-buttons ${
+              selectedCategoryId === null ? "selected" : ""
+            }`}
+          >
+            Wszystkie
+          </button>
+
+          {categories.map((category) => (
+            <button
+              key={category.id_kategorii}
+              onClick={() => handleCategoryClick(category.id_kategorii)}
+              className={`category-buttons ${
+                selectedCategoryId === category.id_kategorii ? "selected" : ""
+              }`}
+            >
+              {category.kategoria}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="product__container__list">{productElements}</div>
     </div>
   );

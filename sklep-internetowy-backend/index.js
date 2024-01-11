@@ -37,8 +37,15 @@ app.use(
 );
 
 app.get("/produkty", async (req, res) => {
+  const categoryId = req.query.category;
+  let query = "SELECT * FROM produkty";
+
+  if (categoryId) {
+    query += ` WHERE id_kategorii = ${categoryId}`;
+  }
+
   try {
-    const result = await pool.query("SELECT * FROM produkty");
+    const result = await pool.query(query);
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -68,6 +75,16 @@ app.get("/size/:nazwa/rozmiary", async (req, res) => {
       [nazwaRozmiaru]
     );
     res.json(result.rows[0].id_rozmiaru);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+app.get("/kategorie", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM kategorie");
+    res.json(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
