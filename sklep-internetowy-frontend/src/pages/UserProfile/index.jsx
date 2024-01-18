@@ -9,7 +9,7 @@ function UserProfile() {
     const fetchUserData = async () => {
       try {
         const response = await fetch("http://localhost:3001/profile", {
-          credentials: "include", // Ważne, aby uwzględnić sesję użytkownika
+          credentials: "include",
         });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

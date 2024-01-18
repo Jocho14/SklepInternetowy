@@ -72,12 +72,12 @@ h1 {
   background-color: #e8e3d5;
 
   &.selected {
-    background-color: #adafad; // zmień na preferowany kolor
+    background-color: #adafad;
     color: #333;
     border-color: #aaa;
 
     &:hover {
-      background-color: #adafad; // opcjonalnie inny kolor przy najechaniu
+      background-color: #adafad;
     }
   }
 

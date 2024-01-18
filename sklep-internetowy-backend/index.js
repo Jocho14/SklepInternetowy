@@ -99,16 +99,28 @@ app.post("/login", async (req, res) => {
       [login, password]
     );
     const userId = result.rows[0].id_uzytkownika;
-    const userType = await sprawdzTypUzytkownika(userId);
+    const userTypes = await sprawdzTypUzytkownika(userId);
 
     if (userId) {
       const userDetails = await getUserDetails(userId);
-      req.session.user = { id: userId, type: userType, name: userDetails.name };
-      req.session.save();
 
-      console.log("creating session user", req.session.user);
+      if (userTypes.length === 1) {
+        req.session.user = {
+          id: userId,
+          type: userTypes[0],
+          name: userDetails.name,
+        };
+        req.session.save();
+        console.log("creating session user", req.session.user);
+      }
 
-      res.json({ success: true, name: userDetails.name });
+      res.json({
+        success: true,
+        id: userId,
+        name: userDetails.name,
+        type: userTypes,
+        sessionCreated: userTypes.length === 1,
+      });
     } else {
       res
         .status(401)
@@ -129,6 +141,33 @@ app.post("/logout", (req, res) => {
       res.status(200).json({ message: "Wylogowano pomyślnie" });
     }
   });
+});
+
+app.post("/setSession", async (req, res) => {
+  try {
+    const { userId, userType } = req.body;
+
+    if (!userId || !userType) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Brak wymaganych danych" });
+    }
+
+    const userDetails = await getUserDetails(userId);
+
+    req.session.user = {
+      id: userId,
+      type: userType,
+      name: userDetails.name,
+    };
+    req.session.save();
+    console.log("Session created for user type", userType);
+
+    res.json({ success: true, message: "Sesja została utworzona" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
 });
 
 // Endpoint do pobierania danych profilu użytkownika
@@ -191,7 +230,6 @@ app.get("/profile", async (req, res) => {
       [userId]
     );
 
-    // Złożenie wszystkich informacji o użytkowniku w jeden obiekt
     const userInfo = {
       ...userData.rows[0],
       adresy: userAddresses.rows,
@@ -208,12 +246,14 @@ app.get("/profile", async (req, res) => {
 
 async function sprawdzTypUzytkownika(idUzytkownika) {
   try {
+    const types = [];
+
     const clientResult = await pool.query(
       "SELECT * FROM klienci WHERE id_uzytkownika = $1",
       [idUzytkownika]
     );
     if (clientResult.rowCount > 0) {
-      return "CLIENT";
+      types.push("CLIENT");
     }
 
     const employeeResult = await pool.query(
@@ -221,10 +261,10 @@ async function sprawdzTypUzytkownika(idUzytkownika) {
       [idUzytkownika]
     );
     if (employeeResult.rowCount > 0) {
-      return "EMPLOYEE";
+      types.push("EMPLOYEE");
     }
 
-    return "UNAUTHORIZED";
+    return types.length > 0 ? types : "UNAUTHORIZED";
   } catch (error) {
     console.error("Błąd przy sprawdzaniu typu użytkownika:", error);
     throw error;
@@ -584,7 +624,6 @@ app.post("/return-product", async (req, res) => {
 
 app.get("/is-product-returned/:orderId/:productId", async (req, res) => {
   const { orderId, productId } = req.params;
-  console.log("is-product-returned: ", orderId, productId);
   try {
     const result = await pool.query(
       `SELECT EXISTS (
@@ -624,6 +663,97 @@ app.post("/finalize-order", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.get("/orders-to-accept", async (req, res) => {
+  try {
+    const query = `
+      SELECT z.id_zamowienia, u.imie, u.nazwisko, z.data_zlozenia_zamowienia
+      FROM zamowienia z
+      INNER JOIN klienci k ON z.id_klienta = k.id_klienta
+      INNER JOIN uzytkownicy u ON k.id_uzytkownika = u.id_uzytkownika
+      WHERE z.data_zlozenia_zamowienia IS NOT NULL AND z.data_przyjecia_zamowienia IS NULL
+    `;
+
+    const result = await pool.query(query);
+
+    const orders = result.rows.map((row) => ({
+      idZamowienia: row.id_zamowienia,
+      imieKlienta: row.imie,
+      nazwiskoKlienta: row.nazwisko,
+      dataZlozeniaZamowienia: row.data_zlozenia_zamowienia,
+    }));
+
+    res.json(orders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+app.get("/returned-orders", async (req, res) => {
+  try {
+    const query = `
+      SELECT z.id_zwrotu, u.imie, u.nazwisko, z.data_zlozenia
+      FROM zwroty z
+      INNER JOIN zamowienia zam ON z.id_powiazanego_zamowienia = zam.id_zamowienia
+      INNER JOIN klienci k ON zam.id_klienta = k.id_klienta
+      INNER JOIN uzytkownicy u ON k.id_uzytkownika = u.id_uzytkownika
+      WHERE z.data_zlozenia IS NOT NULL AND z.data_realizacji IS NULL
+    `;
+
+    const result = await pool.query(query);
+
+    const returns = result.rows.map((row) => ({
+      idZwrotu: row.id_zwrotu,
+      dataZlozenia: row.data_zlozenia,
+      imieKlienta: row.imie,
+      nazwiskoKlienta: row.nazwisko,
+    }));
+
+    res.json(returns);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+app.post("/orders-accept/:id", async (req, res) => {
+  try {
+    const idZamowienia = req.params.id;
+    const result = await pool.query(
+      "UPDATE zamowienia SET data_przyjecia_zamowienia = NOW() WHERE id_zamowienia = $1 RETURNING *",
+      [idZamowienia]
+    );
+
+    if (result.rows.length > 0) {
+      res.json({ success: true, zamowienie: result.rows[0] });
+    } else {
+      res.status(404).send("Zamówienie nie znalezione");
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+app.post("/returns-accept/:id", async (req, res) => {
+  try {
+    const idZwrotu = req.params.id;
+    const result = await pool.query(
+      "UPDATE zwroty SET data_realizacji = NOW() WHERE id_zwrotu = $1 RETURNING *",
+      [idZwrotu]
+    );
+
+    if (result.rows.length > 0) {
+      res.json({ success: true, zwrot: result.rows[0] });
+    } else {
+      res.status(404).send("Zwrot nie znaleziony");
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
   }
 });
 

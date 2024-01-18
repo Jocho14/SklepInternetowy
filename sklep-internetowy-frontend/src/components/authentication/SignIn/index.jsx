@@ -27,21 +27,29 @@ function SignIn() {
         body: JSON.stringify({ login, password }),
       });
 
-      console.log(login, password);
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      if (data.success) {
-        console.log("Zalogowano pomyślnie");
-        loginContext();
-        setLoggedIn(true);
-        navigateTo("/");
+      console.log("DDDDATA:::", data);
+
+      if (data.type && data.type.length > 1) {
+        console.log("Zapisuję userId do localStorage:", data.id);
+        localStorage.setItem("userId", data.id);
+        navigateTo("/role-selection");
+        return;
+      } else if (data.type.length === 1) {
+        if (data.success) {
+          console.log("Zalogowano pomyślnie");
+          loginContext();
+          setLoggedIn(true);
+          navigateTo("/");
+        } else {
+          console.error("Błąd logowania:", data.message);
+          setLoginError(true);
+        }
       } else {
-        console.error("Błąd logowania:", data.message);
-        setLoginError(true);
       }
     } catch (error) {
       console.error("Wystąpił błąd podczas logowania:", error);

@@ -19,8 +19,37 @@ function ProductDetail() {
   const [isSizeError, setIsSizeError] = useState(false);
   const [productSizeId, setProductSizeId] = useState(null);
   const [isAddedToCart, setIsAddedToCart] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [quantity, setQuantity] = useState(1);
+
+  const [userType, setUserType] = useState("");
+
+  useEffect(() => {
+    async function checkSession() {
+      try {
+        setLoading(true);
+        const response = await fetch("http://localhost:3001/check-session", {
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        if (data.isLoggedIn) {
+          console.log("Zalogowano pomyślnie");
+          setUserType(data.user.type);
+        }
+        console.log(data);
+      } catch (error) {
+        console.error("Nie udało się zweryfikować użytkownika:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    checkSession();
+  }, []);
 
   const getOrCreateOrder = async () => {
     try {
@@ -181,7 +210,7 @@ function ProductDetail() {
                 <h4
                   className={`size__title ${isSizeError ? "size__error" : ""}`}
                 >
-                  Wybierz rozmiar
+                  {userType == "CLIENT" && <>Wybierz rozmiar</>}
                 </h4>
                 <div className="product__detail__container__size__list">
                   <SizeSelector
@@ -195,16 +224,22 @@ function ProductDetail() {
                     isSizeError={isSizeError}
                   />
                 </div>
-
-                <div className="quantity-selector-wrapper">
-                  <QuantitySelector
-                    quantity={quantity}
-                    setQuantity={setQuantity}
-                  />
-                </div>
-                <button className="add-to-cart-btn" onClick={handleAddToCart}>
-                  Dodaj do koszyka
-                </button>
+                {userType == "CLIENT" && (
+                  <>
+                    <div className="quantity-selector-wrapper">
+                      <QuantitySelector
+                        quantity={quantity}
+                        setQuantity={setQuantity}
+                      />
+                    </div>
+                    <button
+                      className="add-to-cart-btn"
+                      onClick={handleAddToCart}
+                    >
+                      Dodaj do koszyka
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

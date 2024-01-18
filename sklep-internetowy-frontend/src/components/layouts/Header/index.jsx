@@ -3,12 +3,14 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../../../context/auth";
 import SignOut from "../../authentication/SignOut";
 import cartIcon from "../../../assets/images/header/bagIcon.png";
+import managmentIcon from "../../../assets/images/header/managmentIcon.png";
 import userProfileIcon from "../../../assets/images/header/userProfileIcon.png";
 import "./styles.scss";
 
 function Header() {
   const { isLoggedIn, loginContext, logoutContext } = useAuth();
   const [userName, setUserName] = useState("");
+  const [userType, setUserType] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -22,9 +24,11 @@ function Header() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+
         if (data.isLoggedIn) {
           loginContext();
           setUserName(data.user.name);
+          setUserType(data.user.type);
         }
         console.log(data);
       } catch (error) {
@@ -74,9 +78,14 @@ function Header() {
             <NavLink to="/products">Produkty</NavLink>
             <NavLink to="/aboutus">O nas</NavLink>
             <NavLink to="/contact">Kontakt</NavLink>
-            {isLoggedIn && (
+            {isLoggedIn && userType === "CLIENT" && (
               <NavLink to="/cart" className="cart-link">
                 <img className="cart-icon" src={cartIcon} />
+              </NavLink>
+            )}
+            {isLoggedIn && userType === "EMPLOYEE" && (
+              <NavLink to="/managment" className="cart-link">
+                <img className="cart-icon" src={managmentIcon} />
               </NavLink>
             )}
           </nav>
