@@ -15,7 +15,7 @@ const pool = new Pool({
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:5173", // Adres frontendu
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
@@ -170,17 +170,90 @@ app.post("/setSession", async (req, res) => {
   }
 });
 
-// Endpoint do pobierania danych profilu użytkownika
+app.post("/signup", async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      login,
+      password,
+      phoneNumber,
+      place,
+      houseNumber,
+      postCode,
+    } = req.body;
+
+    await pool.query("BEGIN");
+
+    const emailResult = await pool.query(
+      `INSERT INTO adresy_email (email) VALUES ($1) RETURNING id_email`,
+      [email]
+    );
+
+    const idEmail = emailResult.rows[0].id_email;
+
+    const phoneResult = await pool.query(
+      `INSERT INTO numery_telefonu (numer_telefonu) VALUES ($1) RETURNING id_telefonu`,
+      [phoneNumber]
+    );
+
+    const idTelefonu = phoneResult.rows[0].id_telefonu;
+
+    const addressResult = await pool.query(
+      `INSERT INTO adresy (miejscowosc, ulica, nr_domu, kod_pocztowy) VALUES ($1, '', $2, $3) RETURNING id_adresu`,
+      [place, houseNumber, postCode]
+    );
+
+    const idAdresu = addressResult.rows[0].id_adresu;
+
+    const userResult = await pool.query(
+      `INSERT INTO uzytkownicy (login, haslo, imie, nazwisko) VALUES ($1, $2, $3, $4) RETURNING id_uzytkownika`,
+      [login, password, firstName, lastName]
+    );
+
+    const idUzytkownika = userResult.rows[0].id_uzytkownika;
+
+    await pool.query(
+      `INSERT INTO uzytkownicy_adresy (id_uzytkownika, id_adresu) VALUES ($1, $2)`,
+      [idUzytkownika, idAdresu]
+    );
+    await pool.query(
+      `INSERT INTO uzytkownicy_adresy_email (id_uzytkownika, id_email) VALUES ($1, $2)`,
+      [idUzytkownika, idEmail]
+    );
+    await pool.query(
+      `INSERT INTO uzytkownicy_numery_telefonu (id_uzytkownika, id_telefonu) VALUES ($1, $2)`,
+      [idUzytkownika, idTelefonu]
+    );
+
+    const clientResult = await pool.query(
+      `INSERT INTO klienci (id_uzytkownika) VALUES ($1) RETURNING id_klienta`,
+      [idUzytkownika]
+    );
+
+    await pool.query("COMMIT");
+
+    res.status(201).json({
+      success: true,
+      id: idUzytkownika,
+      message: "Rejestracja zakończona sukcesem.",
+    });
+  } catch (err) {
+    console.error(err);
+    await pool.query("ROLLBACK");
+    res.status(500).send("Błąd serwera podczas rejestracji.");
+  }
+});
+
 app.get("/profile", async (req, res) => {
-  // Sprawdzenie, czy użytkownik jest zalogowany
   if (!req.session.user) {
     return res.status(401).send("Użytkownik nie jest zalogowany.");
   }
 
-  const userId = req.session.user.id; // Pobranie ID użytkownika z sesji
+  const userId = req.session.user.id;
 
   try {
-    // Pobieranie danych użytkownika
     const userData = await pool.query(
       `
       SELECT u.imie, u.nazwisko, u.login, a.miejscowosc, a.ulica, a.nr_domu, a.nr_lokalu, a.kod_pocztowy, e.email, t.numer_telefonu
@@ -347,7 +420,6 @@ app.post("/add-product-to-order", async (req, res) => {
   const { productId, quantity, size } = req.body;
 
   try {
-    // Najpierw znajdź id_rozmiaru na podstawie rozmiaru
     const sizeResult = await pool.query(
       "SELECT id_rozmiaru FROM rozmiary WHERE rozmiar = $1",
       [size]
@@ -372,14 +444,12 @@ app.post("/add-product-to-order", async (req, res) => {
           .send("Nie możesz dodać więcej niż 5 sztuk produktu.");
       }
 
-      // Aktualizuj ilość istniejącego produktu w zamówieniu
       const updatedProductResult = await pool.query(
         "UPDATE zamowienia_produkty SET ilosc = $1 WHERE id_zamowienia = $2 AND id_produktu = $3 AND id_rozmiaru = $4 RETURNING *",
         [newQuantity, req.session.orderId, productId, id_rozmiaru]
       );
       res.json(updatedProductResult.rows[0]);
     } else {
-      // Dodaj nowy produkt do zamówienia z danym id_rozmiaru
       const addedProductResult = await pool.query(
         "INSERT INTO zamowienia_produkty (id_zamowienia, id_produktu, ilosc, id_rozmiaru) VALUES ($1, $2, $3, $4) RETURNING *",
         [req.session.orderId, productId, quantity, id_rozmiaru]
@@ -500,7 +570,6 @@ app.get("/pending-orders", async (req, res) => {
       [req.session.user.id]
     );
 
-    // Struktura danych do przesłania jako odpowiedź JSON
     let orders = completedOrdersResult.rows.reduce((acc, item) => {
       let order = acc.find(
         (order) => order.id_zamowienia === item.id_zamowienia
@@ -561,7 +630,6 @@ app.get("/completed-orders", async (req, res) => {
       [req.session.user.id]
     );
 
-    // Struktura danych do przesłania jako odpowiedź JSON
     let orders = completedOrdersResult.rows.reduce((acc, item) => {
       let order = acc.find(
         (order) => order.id_zamowienia === item.id_zamowienia
@@ -602,14 +670,12 @@ app.post("/return-product", async (req, res) => {
   }
 
   try {
-    // Tworzenie nowego zwrotu
     const newReturn = await pool.query(
       "INSERT INTO zwroty (id_powiazanego_zamowienia, data_zlozenia) VALUES ($1, NOW()) RETURNING id_zwrotu",
       [orderId]
     );
     const returnId = newReturn.rows[0].id_zwrotu;
 
-    // Dodanie produktu do zwrotu
     await pool.query(
       "INSERT INTO zwroty_produkty (id_zwrotu, id_produktu, ilosc, cena) VALUES ($1, $2, $3, $4)",
       [returnId, productId, quantity, price]

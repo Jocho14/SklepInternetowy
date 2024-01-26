@@ -9,6 +9,33 @@ function SignUp() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [place, setPlace] = useState("");
+  const [houseNumber, setHouseNumber] = useState("");
+  const [postCode, setPostCode] = useState("");
+
+  const registerUser = async (userData) => {
+    try {
+      const response = await fetch("http://localhost:3001/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 201) {
+        alert("Rejestracja zakończona sukcesem!");
+        console.log(data);
+      } else {
+        alert("Błąd rejestracji: " + data.message);
+      }
+    } catch (error) {
+      console.error("Błąd podczas rejestracji:", error);
+      alert("Błąd podczas rejestracji. Spróbuj ponownie później.");
+    }
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -16,15 +43,27 @@ function SignUp() {
       alert("Hasła nie są identyczne.");
       return;
     }
-    console.log(firstName, lastName, email, login, password, phoneNumber);
-    // Tutaj logika do obsługi rejestracji
+
+    const userData = {
+      firstName,
+      lastName,
+      email,
+      login,
+      password,
+      phoneNumber,
+      place,
+      houseNumber,
+      postCode,
+    };
+
+    registerUser(userData);
   };
 
   return (
     <div className="sign-up-wrapper">
       <div className="sign-up-container">
         <h1>Zarejestruj się w LondonLook</h1>
-        <form className="sign-up-form">
+        <form className="sign-up-form" onSubmit={handleSubmit}>
           <div className="input-wrapper">
             <label htmlFor="name">Imię</label>
             <input
@@ -99,6 +138,39 @@ function SignUp() {
               placeholder="Numer telefonu"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
+              required
+            />
+          </div>
+          <div className="input-wrapper">
+            <label htmlFor="place">Miejscowość</label>
+            <input
+              id="place"
+              type="text"
+              placeholder="Miejscowość"
+              value={place}
+              onChange={(e) => setPlace(e.target.value)}
+              required
+            />
+          </div>
+          <div className="input-wrapper">
+            <label htmlFor="house-number">Nr domu</label>
+            <input
+              id="house-number"
+              type="text"
+              placeholder="Nr domu"
+              value={houseNumber}
+              onChange={(e) => setHouseNumber(e.target.value)}
+              required
+            />
+          </div>
+          <div className="input-wrapper">
+            <label htmlFor="post-code">Kod pocztowy</label>
+            <input
+              id="post-code"
+              type="text"
+              placeholder="Kod pocztowy"
+              value={postCode}
+              onChange={(e) => setPostCode(e.target.value)}
               required
             />
           </div>
