@@ -1,9 +1,9 @@
 """
 INSTRUKCJA
 1. pip install psycopg2
-2. Zmień ścieżkę global_user_path, tak aby wskazywała na folder script
-3. W metodzie main wstaw swoje parametry bazy danych
-4. W metodzie main odkomentuj wybraną operacje i uruchom program
+2. Zmienic ścieżkę global_user_path, tak aby wskazywała na folder script
+3. W metodzie main wstawic swoje parametry bazy danych
+4. Uruchomić program
 """
 import psycopg2
 import time
@@ -150,11 +150,11 @@ def main():
     connection = psycopg2.connect(host=host, dbname=dbname, user=user, password=password)
 
     """Tworzenie tabel"""
-    file_path_create_table = 'C:/Users/HP/Desktop/bazaDanychPliki/BD2_tabele.sql'
-    #execute_many_sql_from_file(file_path_producenci, connection)
+    file_path_create_table = global_user_path + 'procedures/BD2_tabele.sql'
+    execute_many_sql_from_file(file_path_producenci, connection)
 
     """Wypełnianie tabel danymi"""
-    #insert_all_data(connection)
+    insert_all_data(connection)
 
     """Wstawienie widoków"""
     file_path_views = 'C:/Users/HP/Desktop/bazaDanychPliki/BD2_widoki.sql'
