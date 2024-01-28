@@ -8,12 +8,22 @@ INSTRUKCJA
 import psycopg2
 import time
 
-global_user_path = "C:/Users/HP/Desktop/script/"
+global_user_path = "C:/Users/HP/Desktop/SklepInternetowy/script/"
 def execute_sql_from_file(cursor, file_path):
     """Wykonuje skrypt SQL z podanego pliku."""
     with open(file_path, 'r') as file:
         sql_script = file.read()
     cursor.execute(sql_script)
+
+def execute_sql_from_file2(connection, file_path):
+    """Wykonuje skrypt SQL z podanego pliku."""
+    cursor = connection.cursor()
+    with open(file_path, 'r') as file:
+        sql_script = file.read()
+    cursor.execute(sql_script)
+    connection.commit()
+    cursor.close()
+    connection.close()
 
 
 def execute_many_sql_from_file(file_path, connection):
@@ -104,7 +114,7 @@ def insert_all_data(connection):
         # Zamknięcie połączenia i kursora
         if connection is not None:
             cursor.close()
-            connection.close()
+            #connection.close()
 
 
 def find_random_customer_id(cursor):
@@ -141,20 +151,24 @@ def measure_search_time(host, dbname, user, password):
 
 def main():
     # Parametry połączenia (wstaw swoje parametry)
-    host = ""
-    dbname = ""
-    user = ""
-    password = ""
+    host = "localhost"
+    dbname = "bazaDanychTest"
+    user = "postgres"
+    password = "postgres"
 
     # Połączenie
     connection = psycopg2.connect(host=host, dbname=dbname, user=user, password=password)
 
     """Tworzenie tabel"""
     file_path_create_table = global_user_path + 'procedures/BD2_tabele.sql'
-    execute_many_sql_from_file(file_path_producenci, connection)
+    execute_many_sql_from_file(file_path_create_table, connection)
 
     """Wypełnianie tabel danymi"""
     insert_all_data(connection)
+
+    """Tworzenie funkcji"""
+    file_path_create_function = global_user_path + 'procedures/BD2_logowanie.sql'
+    execute_sql_from_file2(connection, file_path_create_function)
 
     """Wstawienie widoków"""
     file_path_views = 'C:/Users/HP/Desktop/bazaDanychPliki/BD2_widoki.sql'
