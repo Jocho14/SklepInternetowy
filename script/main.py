@@ -152,9 +152,9 @@ def measure_search_time(host, dbname, user, password):
 def main():
     # Parametry połączenia (wstaw swoje parametry)
     host = "localhost"
-    dbname = "bazaDanychTest"
-    user = "postgres"
-    password = "postgres"
+    dbname = "bazaDanych"
+    user = ""
+    password = ""
 
     # Połączenie
     connection = psycopg2.connect(host=host, dbname=dbname, user=user, password=password)
